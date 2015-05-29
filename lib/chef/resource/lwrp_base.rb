@@ -25,7 +25,6 @@ require 'chef/log'
 require 'chef/exceptions'
 require 'chef/mixin/convert_to_class_name'
 require 'chef/mixin/from_file'
-require 'chef/mixin/params_validate' # for DelayedEvaluator
 
 class Chef
   class Resource
@@ -76,11 +75,7 @@ class Chef
 
         # Define an attribute on this resource, including optional validation
         # parameters.
-        def attribute(attr_name, validation_opts={})
-          define_method(attr_name) do |arg=nil|
-            set_or_return(attr_name.to_sym, arg, validation_opts)
-          end
-        end
+        alias :attribute :property
 
         # Sets the default action
         def default_action(action_name=NULL_ARG)
@@ -126,10 +121,6 @@ class Chef
 
         def node
           run_context ? run_context.node : nil
-        end
-
-        def lazy(&block)
-          DelayedEvaluator.new(&block)
         end
 
         protected
