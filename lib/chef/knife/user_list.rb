@@ -34,8 +34,35 @@ class Chef
         :long => "--with-uri",
         :description => "Show corresponding URIs"
 
+      def osc_11_warning
+<<-EOF
+knife user list failed in a way that indicates that you are using an Open Source 11 Server.
+knife user list for Open Source 11 Server is being deprecated.
+Open Source 11 Server user commands now live under the knife opc_user namespace.
+For backwards compatibility, we will forward this request to knife osc_user list.
+If you are using an Open Source 11 Server, please use that command to avoid this warning.
+EOF
+      end
+
+      def run_osc_11_user_list
+        Chef::Knife.run(ARGV, Chef::Application::Knife.options)
+      end
+
       def run
-        output(format_list_for_display(Chef::User.list))
+        begin
+          output(format_list_for_display(Chef::User.list))
+        # delete this rescue once OSC11 support is gone
+        rescue TypeError => e
+          raise e unless /no implicit conversion of String into Integer/.match(e.message)
+
+          # if we've made it here, then the Chef Server is likely OSC 11, forward the request
+          ui.warn(osc_11_warning)
+
+          # run osc_user_list with our input
+          ARGV.delete("user")
+          ARGV.unshift("osc_user")
+          run_osc_11_user_list
+        end
       end
     end
   end

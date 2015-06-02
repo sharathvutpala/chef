@@ -25,6 +25,10 @@ require 'chef/mixin/api_version_request_handling'
 require 'chef/exceptions'
 require 'chef/server_api'
 
+# OSC 11 BACKWARDS COMPATIBILITY NOTE (remove after OSC 11 support ends)
+#
+# In general, Chef::User is no longer expected to support Open Source Chef 11 Server requests.
+# The object that handles those requests has been moved to the Chef::OscUser namespace.
 class Chef
   class User
 
@@ -132,6 +136,7 @@ class Chef
     end
 
     def destroy
+      # will default to the current API version supported by client
       Chef::REST.new(Chef::Config[:chef_server_url]).delete("users/#{@username}")
     end
 
@@ -299,6 +304,7 @@ class Chef
     end
 
     def self.load(username)
+      # will default to the current API version supported by client
       response = Chef::REST.new(Chef::Config[:chef_server_url]).get("users/#{username}")
       Chef::User.from_hash(response)
     end
