@@ -98,12 +98,14 @@ class Chef
               :default => {
                 :service => Chef::Provider::Service::Redhat,
                 :package => Chef::Provider::Package::Yum,
+                :ifconfig => Chef::Provider::Ifconfig::Redhat
               }
             },
             :xcp   => {
               :default => {
                 :service => Chef::Provider::Service::Redhat,
                 :package => Chef::Provider::Package::Yum,
+                :ifconfig => Chef::Provider::Ifconfig::Redhat
               }
             },
             :centos   => {
@@ -120,12 +122,14 @@ class Chef
               :default => {
                 :service => Chef::Provider::Service::Redhat,
                 :package => Chef::Provider::Package::Yum,
+                :ifconfig => Chef::Provider::Ifconfig::Redhat
               }
             },
             :scientific => {
               :default => {
                 :service => Chef::Provider::Service::Systemd,
                 :package => Chef::Provider::Package::Yum,
+                :ifconfig => Chef::Provider::Ifconfig::Redhat
               },
               "< 7" => {
                 :service => Chef::Provider::Service::Redhat
@@ -167,6 +171,7 @@ class Chef
               :default => {
                 :service => Chef::Provider::Service::Systemd,
                 :package => Chef::Provider::Package::Yum,
+                :ifconfig => Chef::Provider::Ifconfig::Redhat
               },
               "< 7" => {
                 :service => Chef::Provider::Service::Redhat
@@ -304,7 +309,7 @@ class Chef
 
         name_sym = name
         if name.kind_of?(String)
-          name.downcase!
+          name = name.downcase
           name.gsub!(/\s/, "_")
           name_sym = name.to_sym
         end
@@ -456,7 +461,7 @@ class Chef
 
         def platform_provider(platform, version, resource_type)
           pmap = Chef::Platform.find(platform, version)
-          rtkey = resource_type.kind_of?(Chef::Resource) ? resource_type.resource_name.to_sym : resource_type
+          rtkey = resource_type.respond_to?(:resource_name) ? resource_type.resource_name.to_sym : resource_type
           pmap.has_key?(rtkey) ? pmap[rtkey] : nil
         end
 
